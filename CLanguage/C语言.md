@@ -52,7 +52,10 @@ int main()   // 主函数 - 程序入口，main函数有且仅有一个
 
 ## 1.4 数据类型
 
-计算字符类型==所占字节数== 的函数 ：`sizeof()`
++ 内置类型 -- int，float ……
++ 自定义类型 -- 结构体，枚举，共用体。
+
+计算字符类型==所占字节数==  ：`sizeof()`  -- **是操作符/运算符，不是函数。**
 
 C 语言标准规定：
 
@@ -105,7 +108,7 @@ int main()
 
 ## 1.5 常量、变量
 
-指定数据类型为 ==单精度==且 ==小数部分不为0==时，要加上后缀f。`float weight = 94.3f;`，否则会有警告。
+指定数据类型为 ==单精度==且 ==小数部分不为0==时，要加上后缀f。`float weight = 94.3f;`，否则会有警告（直接写出来的浮点数默认是double类型）。
 
 ## 1.6 局部变量、全局变量
 
@@ -322,10 +325,13 @@ int main()
 
 ## 1.9 常见关键字
 
++ 关键字不能自己创建。
++ 变量名不能是关键字。
+
 ```c
 auto（自动）  break   case  char  const   continue  default  do   double else  enum   
-extern（引入外部符号） float  for   goto  if   int   long  register（寄存器关键字）    return   short  signed（有符号数）
-sizeof   static struct  switch  typedef(类型定义（或类型重命名）) union（联合体 / 共用体）  unsigned   void  volatile  while
+extern（声明/引入外部符号） float  for   goto  if   int   long  register（寄存器关键字）    return   short  signed（有符号数）
+sizeof   static struct  switch  typedef(类型定义（或类型重命名）) union（联合体 / 共用体）  unsigned   void  volatile(Linux系统部分)  while
 ```
 
 ```c
@@ -373,9 +379,9 @@ int main()
 #include <stdio.h>
 void test()
 {
-	int i = 0;
-	i++;
-	printf("%d ", i);
+	int a = 0;
+	a++;
+	printf("%d ", a);
 }
 int main()
 {
@@ -397,9 +403,9 @@ int main()
 void test()
 {
 	//static修饰局部变量
-	static int i = 0;
-	i++;
-	printf("%d ", i);
+	static int a = 0;
+	a++;
+	printf("%d ", a);
 }
 int main()
 {
@@ -420,15 +426,16 @@ int main()
 
 `static `修饰局部变量改变了变量的生命周期，让静态局部变量出了作用域仍然存在，到程序结束，生命周期才结束。
 
-
-
 **2. 修饰全局变量**
 
 ```c
 //代码1
 //add.c
 int g_val = 2018;
+
 //test.c
+// 声明外部变量
+extern g_val;
 int main()
 {
     printf("%d\n", g_val);
@@ -436,10 +443,14 @@ int main()
 }
 // 可以正常运行
 
+
 //代码2
 //add.c
 static int g_val = 2018;
+
 //test.c
+// 声明外部变量
+extern g_val;
 int main()
 {
     printf("%d\n", g_val);
@@ -450,9 +461,7 @@ int main()
 
 **结论：**
 
-一个全局变量被`static`修饰，使得这个全局变量只能在==本源文件内使用==，不能在其他源文件内使用。
-
-
+全局变量本身是具有外部链接属性的，但是一个全局变量被`static`修饰，使得这个全局变量失去外部链接属性，只能在==本源文件内使用==，不能在其他源文件内使用。
 
 **3. 修饰函数**
 
@@ -461,9 +470,13 @@ int main()
 //add.c
 int Add(int x, int y) 
 {
-    return c+y; 
+    return x+y; 
 }
+
 //test.c
+// 声明外部符号
+// extern 最好加上
+extern int Add(int x,int y);
 int main()
 {
     printf("%d\n", Add(2, 3));
@@ -471,13 +484,16 @@ int main()
 }
 // 可以正常运行
 
+
 //代码2
 //add.c
 static int Add(int x, int y) 
 {
-    return c+y; 
+    return x+y; 
 }
 //test.c
+// 声明外部符号
+int Add(int x,int y);
 int main()
 {
     printf("%d\n", Add(2, 3));
@@ -488,19 +504,17 @@ int main()
 
 **结论：**
 
-一个函数被`static`修饰，使得这个函数只能在本源文件内使用，不能在其他源文件内使用。
+函数默认具有外部链接属性，但是一个函数被`static`修饰，使得函数失去外部链接属性，变成内部链接属性，这个函数只能在本源文件内使用，不能在其他源文件内使用。
 
 `static`修饰函数改变了函数的链接属性。
 
 由外部链接属性  变为 内部连接属性。
 
-
-
 ## 1.10 #define 定义常量和宏
 
 ```c
 #include <stdio.h>
-// #define 定义标识符常量
+// #define #include -- 预处理指令
 #define MAX 100
 // #define 定义宏
 // 函数的实现
@@ -525,12 +539,13 @@ int main()
     printf("max = %d\n", max);
     // 宏的定义
     max = MAX(a, b);
+    // max = ((a)+(b));
     printf("max = %d\n", max);
     return 0;
 }
 ```
 
-
+![](C语言.assets/76.jpg)
 
 # 第二章 分支语句和循环语句
 
@@ -619,6 +634,8 @@ int main()
 ```
 
 ####  悬空else
+
+**《高质量C++编程指南》**
 
 ```C
 #include <stdio.h>
@@ -966,7 +983,7 @@ int main()
  }
  //1.  for循环的初始化、调整、判断，都可以被省略，
  	// 但是:
- 	// for 循环的判断部分如果被省略，那判断条件就是:恒为正
+ 	// for 循环的判断部分如果被省略，那判断条件就是:恒为真
 // 2.  不要随便省略相应的代码    
     
  //变种2
@@ -1003,8 +1020,6 @@ int main()
 // 循环执行0次，因为判断表达式中 k = 0 ,0为假，所以循环执行0次。
 ```
 
-
-
 ### 2.2.3 do … while 语句
 
 ```c
@@ -1034,448 +1049,446 @@ int main()
 
 ### 2.2.4 练习
 
-1. 计算 n 的阶乘。
+> 计算 n 的阶乘。
 
-   ```c
-   #include <stdio.h>
-   int main()
-   {
-       int i = 0;
-       int n = 0;
-       int sum = 1;
-       printf("请输入一个数，将输出这个数的阶乘\n");
-       scanf("%d", &n);
-       for (i = 1; i <= n; i++)
-           sum *= i;
-       printf("%d的阶乘为:>%d", n, sum);
-       
-       return 0;
-   }
-   ```
-
-   
-
-2. 计算 1!+2!+3!+……+10!
-
-   ```C
-   // 方法一
-   #include <stdio.h>
-   int main()
-   {
-       int i = 0;
-       int j = 0;
-       int n = 0;
-       int sum = 0;
-       for (n = 1; n <= 10; n++)
-       {
-           j = 1;
-           for (i = 1; i <= n; i++)
-               j *= i;   
-           printf("%d的阶乘为:>%d\n", n, j);
-           
-           sum += j;
-       }
-       printf("1!+2!+3!+……+10!的和为%d",sum);
-       
-       return 0;
-   }
-   
-   
-   
-   
-   // 方法二
-   #include <stdio.h>
-   int main()
-   {
-       int i = 0;
-       int j = 1;
-       int n = 0;
-       int sum = 0;
-       for (n = 1; n <= 10; n++)
-       {
-           j *= n;   
-           sum += j;
-       }
-       printf("1!+2!+3!+……+10!的和为%d",sum);
-       
-       return 0;
-   }
-   ```
-
-   
-
-3. 在一个有序数组中查找具体的某个数字n。 编写int binsearch(int x, int v[], int n); 功能：在v[0]<=v[1]<=v[2]<= ….<=v[n-1]的数组中查找x。
-
-   ```c
-   // 方法一  -- O(n)
-   #include <stdio.h>
-   int main()
-   {
-       int arr[] = { 1,2,3,4,5,6,7,8,9,10 };
-       int k = 17;
-       int i = 0;
-       int sz = sizeof(arr) / sizeof(arr[0]);
-       for (i = 0; i < sz; i++)
-       {
-           if (k == arr[i])
-           {
-               printf("找到了，下标为:%d\n", i);
-               break;
-           }
-       }
-       if (i == sz)
-           printf("找不到\n");
-       
-       return 0;
-   }
-   
-   
-   // 方法二  -- O(log~2~^n^)
-   // 折半查找、二分查找算法
-   #include <stdio.h>
-   int main()
-   {
-       int arr[] = { 1,2,3,4,5,6,7,8,9,10 };
-       int k = 7;
-   
-       int sz = sizeof(arr) / sizeof(arr[0]);  // 计算元素个数
-       int left = 0; // 左下标
-       int right = sz - 1; // 右下标
-   
-   
-       while(left <= right)
-       {
-           int mid = (left + right) / 2; // 中间元素下标
-           if (arr[mid] > k)
-           {
-               right = mid - 1;
-           }
-           else if (arr[mid] < k)
-           {
-               left = mid + 1;
-           }
-           else
-           {
-               printf("找到了,下标为:%d\n", mid);
-               break;
-           }
-       }
-       if (left > right)
-           printf("找不到\n");
-       return 0;
-   }
-   ```
-
-4. 编写代码，演示多个字符从两端移动，向中间汇聚。
-
-   ```c
-   #include <stdio.h>
-   #include <string.h>
-   #include <windows.h>  // 调用sleep函数
-   #include <stdlib.h>  // 调用清屏函数
-   int main()
-   {
-       char arr1[] = "welcome to bit!!!!!!";
-       char arr2[] = "####################";
-       int left = 0;
-       // char arr[] = "abc";
-       // [a b c \0]
-       //  0 1 2  3
-       // 表示下标时应该 4-2  -- sizeof(arr)/sizeof(arr[0])-2
-       // int right = sizeof(arr1)/sizeof(arr1[0])-2;
-       int right = strlen(arr1) - 1;
-       while (left <= right)
-       {
-           arr2[left] = arr1[left];
-           arr2[right] = arr1[right];
-           printf("%s\n", arr2);
-           // 休息1秒 -- 1000毫秒
-           Sleep(1000);
-           system("cls"); // 执行系统命令的一个函数 - cls - 清空屏幕
-           left++;
-           right--;
-       }
-       return 0;
-   }
-   ```
-
-5. 模拟用户登录情景，并且只能登录三次。（只允许输入三次密码，如果密码正确，提示登录成功，如果三次均输入错误，则退出程序。）
-
-   ```c
-   #include <stdio.h>
-   #include <string.h
-   int main()
-   {
-   
-       int i = 0;
-       char password[20] = { 0 };
-       for (i = 0; i < 3; i++)
-       {
-           printf("请输入密码:>");
-           scanf("%s", password);
-           if (0 == strcmp(password, "123")) // == 不能用来比较两个字符串是否相等，应该使用一个库函数strcmp
-           {
-               printf("登录成功\n");
-               break;
-           }
-           else
-               printf("密码错误\n");
-       }
-       if (i == 3)
-           printf("三次密码均错误，退出程序\n");
-       
-       return 0;
-   }
-   ```
-
-6. 求最大公约数
-
-   ```c
-   // 辗转相除法
-   #include <stdio.h>
-   int main()
-   {
-       int m = 24;
-       int n = 6;
-       int r = 0;
-       while (r = m % n)
-       {
-           // r = m % n;
-           m = n;
-           n = r;
-       }
-       printf("%d\n", n);
-       return 0;
-   }
-   ```
-
-7. 打印1000~2000 之间的闰年
-
-   ```c
-   // 方法1
-   #include <stdio.h>
-   int main()
-   {
-       int year = 0;
-       int count = 0;
-       for (year = 1000; year <= 2000; year++)
-       {
-           // 判断闰年的方法：
-           // 1. 能被4整除并且不能被100整除是闰年
-           // 2. 能被400整除是闰年
-           if (0 == year % 4 && 0 != year % 100)
-           {
-               printf("%d ", year);
-               count++;
-           }
-           else if (0 == year % 400)
-           {
-               printf("%d ", year);
-               count++;
-           }
-       }
-       printf("\n有%d个闰年", count);
-       return 0;
-   }
-   
-   
-   // 方法二
-   #include <stdio.h>
-   int main()
-   {
-       int year = 0;
-       int count = 0;
-       for (year = 1000; year <= 2000; year++)
-       {
-           // 判断闰年的方法：
-           // 1. 能被4整除并且不能被100整除是闰年
-           // 2. 能被400整除是闰年
-           if ((0 == year % 4 && 0 != year % 100) || (0 == year % 400))
-           {
-               printf("%d ", year);
-               count++;
-           }
-       }
-       printf("\n有%d个闰年", count);
-       return 0;
-   }
-   ```
-
-8. 打印 100 ~ 200 之间的素数。
-
-   ==《素数求解的n种境界》==
-
-   ```c
-   #include <stdio.h>
-   #include <math.h>
-   int main()
-   {
-       int i = 0;
-       int count = 0;
-       for (i = 101; i <= 200; i+=2)
-       {    
-           int j = 0;
-           // sqrt() -- 开平方的数学库函数
-           for (j = 2; j <= sqrt(i); j++)
-           {
-               if (0 == i % j)
-               { 
-                   break;
-               }                
-           }
-           if (j > sqrt(i))
-           {
-               count++;
-               printf("%d是素数\n", i);
-   
-           }
-       }
-       printf("count = %d\n", count);
-       return 0;
-   }
-   ```
-
-9. 计算1/1-1/2+1/3+1/4+1/5+……+1/99-1/100的值，打印结果。
-
-   ```c
-   #include <stdio.h>
-   int main()
-   {
-       int i = 0;
-       int flag = 1;
-       double sum = 0;
-       for (i = 1; i < 101; i++)
-       {
-           sum += flag * 1.0 / i;
-           flag = -flag;
-       }
-       printf("sum = %lf", sum);
-       return 0;
-   }
-   ```
-
-10. 求十个整数中的最大值
-
-   ```c
-   #include <stdio.h>
-   int main()
-   {
-       int arr[] = { -1,-2,-3,-4,-5,-6,-7,-8,-9,-10 };
-       int max = arr[0]; // 由于数组中的数都是小于0 的，如果将max初始化为0，则将找不出该数组中的最大值。所以用数组的第一个数对max进行初始化。
-       int i = 0;
-       int sz = sizeof(arr) / sizeof(arr[0]);
-       for (i = 0; i < sz; i++)
-       {
-           if (arr[i] > max) {
-               max = arr[i];
-           }
-       }
-       printf("max = %d\n", max);
-       return 0;
-   }
-   ```
-
-11. 打印九九乘法表
-
-    ```c
-    #include <stdio.h>
-    #include <math.h>
-    int main()
-    {
-        int i = 0;
-        int j = 0;
-        for (i = 1; i <= 9; i++)
-        {
-            for (j = 1; j <= i; j++)
-                printf("%d*%d=%d\t", j, i, i * j);
-            printf("\n");
-        }
-        return 0;
-    }
-    ```
-
-12. 猜大小游戏
-
-    ```c
-    #include <stdio.h>
-    #include <time.h>
-    #include <stdlib.h>
-    void menu()
-    {
-        //system("cls");
-        printf("***************************************\n");
-        printf("****  1.play         0.exit        ****\n");
-        printf("***************************************\n");
-    }
+```c
+#include <stdio.h>
+int main()
+{
+    int i = 0;
+    int n = 0;
+    int sum = 1;
+    printf("请输入一个数，将输出这个数的阶乘\n");
+    scanf("%d", &n);
+    for (i = 1; i <= n; i++)
+        sum *= i;
+    printf("%d的阶乘为:>%d", n, sum);
     
-    
-    void game()
-    {
-        // 1. 生成一个随机数
-        int ret = 0;
-        int guess = 0; // 接收猜的数字
-        // 拿时间戳来设置随机数的生成起始点
-        // time_t time(time_t *timer)
-        // time_t
-        //srand((unsigned int)time(NULL));
-    
-        // rand() 生成 0~0x7fff 的随机值
-        ret = rand()%100+1; // 生成1-100之间的随机数
-        // printf("%d\n", ret);
-        // 2. 猜数字
-        while (1)
-        {
-            printf("请猜数字:>");
-            scanf("%d", &guess);
-            if (guess > ret)
-                printf("猜大了\n");
-            else if (guess < ret)
-                printf("猜小了\n");
-            else
-            {
-                printf("猜对了\n");
-                break;
-            }
-        }
-        
-    
-        
-    }
-    int main()
-    {
-        int input = 0;
-        srand((unsigned int)time(NULL));
-        do
-        {
-            menu();
-            printf("请选择：>");
-            scanf("%d", &input);
-            switch (input)
-            {
-            case 1:
-                game();
-                break;
-            case 0:
-                printf("退出游戏\n");
-                break;
-            default:
-                printf("选择错误\n");
-                break;   
-            }
-    
-        } while (input);
-        return 0;
-    }
-    ```
+    return 0;
+}
 ```
+
+> 计算 1!+2!+3!+……+10!
+
+```C
+// 方法一
+#include <stdio.h>
+int main()
+{
+    int i = 0;
+    int j = 0;
+    int n = 0;
+    int sum = 0;
+    for (n = 1; n <= 10; n++)
+    {
+        j = 1;
+        for (i = 1; i <= n; i++)
+            j *= i;   
+        printf("%d的阶乘为:>%d\n", n, j);
+        
+        sum += j;
+    }
+    printf("1!+2!+3!+……+10!的和为%d",sum);
     
+    return 0;
+}
+
+
+
+
+// 方法二
+#include <stdio.h>
+int main()
+{
+    int i = 0;
+    int j = 1;
+    int n = 0;
+    int sum = 0;
+    for (n = 1; n <= 10; n++)
+    {
+        j *= n;   
+        sum += j;
+    }
+    printf("1!+2!+3!+……+10!的和为%d",sum);
     
+    return 0;
+}
+```
+
+> 在一个有序数组中查找具体的某个数字n。 
+>
+> 编写int binsearch(int x, int v[], int n); 
+>
+> 功能：在v[0]<=v[1]<=v[2]<= ….<=v[n-1]的数组中查找x。
+
+```c
+// 方法一  -- O(n)
+#include <stdio.h>
+int main()
+{
+    int arr[] = { 1,2,3,4,5,6,7,8,9,10 };
+    int k = 17;
+    int i = 0;
+    int sz = sizeof(arr) / sizeof(arr[0]);
+    for (i = 0; i < sz; i++)
+    {
+        if (k == arr[i])
+        {
+            printf("找到了，下标为:%d\n", i);
+            break;
+        }
+    }
+    if (i == sz)
+        printf("找不到\n");
+    
+    return 0;
+}
+
+
+// 方法二  -- O(log~2~^n^)
+// 折半查找、二分查找算法
+#include <stdio.h>
+int main()
+{
+    int arr[] = { 1,2,3,4,5,6,7,8,9,10 };
+    int k = 7;
+
+    int sz = sizeof(arr) / sizeof(arr[0]);  // 计算元素个数
+    int left = 0; // 左下标
+    int right = sz - 1; // 右下标
+
+
+    while(left <= right)// 即使是left == right 也有一个元素要查找
+    {
+        int mid = (left + right) / 2; // 中间元素下标
+        if (arr[mid] > k)
+        {
+            right = mid - 1;
+        }
+        else if (arr[mid] < k)
+        {
+            left = mid + 1;
+        }
+        else
+        {
+            printf("找到了,下标为:%d\n", mid);
+            break;
+        }
+    }
+    if (left > right)
+        printf("找不到\n");
+    return 0;
+}
+```
+
+> 编写代码，演示多个字符从两端移动，向中间汇聚。
+
+```c
+#include <stdio.h>
+#include <string.h>
+#include <windows.h>  // 调用sleep函数
+#include <stdlib.h>  // 调用清屏函数
+int main()
+{
+    char arr1[] = "welcome to bit!!!!!!";
+    char arr2[] = "####################";
+    int left = 0;
+    // char arr[] = "abc";
+    // [a b c \0]
+    //  0 1 2  3
+    // 表示下标时应该 4-2  -- sizeof(arr)/sizeof(arr[0])-2
+    // int right = sizeof(arr1)/sizeof(arr1[0])-2;
+    int right = strlen(arr1) - 1;
+    while (left <= right)
+    {
+        arr2[left] = arr1[left];
+        arr2[right] = arr1[right];
+        printf("%s\n", arr2);
+        // 休息1秒 -- 1000毫秒
+        Sleep(1000);
+        system("cls"); // 执行系统命令的一个函数 - cls - 清空屏幕
+        left++;
+        right--;
+    }
+    printf("%s\n", arr2);
+    return 0;
+}
+```
+
+> 模拟用户登录情景，并且只能登录三次。（只允许输入三次密码，如果密码正确，提示登录成功，如果三次均输入错误，则退出程序。）
+
+```c
+#include <stdio.h>
+#include <string.h
+int main()
+{
+
+    int i = 0;
+    char password[20] = { 0 };
+    for (i = 0; i < 3; i++)
+    {
+        printf("请输入密码:>");
+        scanf("%s", password);
+        if (0 == strcmp(password, "123")) // == 不能用来比较两个字符串是否相等，应该使用一个库函数strcmp
+        {
+            printf("登录成功\n");
+            break;
+        }
+        else
+            printf("密码错误\n");
+    }
+    if (i == 3)
+        printf("三次密码均错误，退出程序\n");
+    
+    return 0;
+}
+```
+
+> 求最大公约数
+
+```c
+// 辗转相除法
+#include <stdio.h>
+int main()
+{
+    int m = 24;
+    int n = 6;
+    int r = 0;
+    while (r = m % n)
+    {
+        // r = m % n;
+        m = n;
+        n = r;
+    }
+    printf("%d\n", n);
+    return 0;
+}
+```
+
+> 打印1000~2000 之间的闰年
+
+```c
+// 方法1
+#include <stdio.h>
+int main()
+{
+    int year = 0;
+    int count = 0;
+    for (year = 1000; year <= 2000; year++)
+    {
+        // 判断闰年的方法：
+        // 1. 能被4整除并且不能被100整除是闰年
+        // 2. 能被400整除是闰年
+        if (0 == year % 4 && 0 != year % 100)
+        {
+            printf("%d ", year);
+            count++;
+        }
+        else if (0 == year % 400)
+        {
+            printf("%d ", year);
+            count++;
+        }
+    }
+    printf("\n有%d个闰年", count);
+    return 0;
+}
+
+
+// 方法二
+#include <stdio.h>
+int main()
+{
+    int year = 0;
+    int count = 0;
+    for (year = 1000; year <= 2000; year++)
+    {
+        // 判断闰年的方法：
+        // 1. 能被4整除并且不能被100整除是闰年
+        // 2. 能被400整除是闰年
+        if ((0 == year % 4 && 0 != year % 100) || (0 == year % 400))
+        {
+            printf("%d ", year);
+            count++;
+        }
+    }
+    printf("\n有%d个闰年", count);
+    return 0;
+}
+```
+
+> 打印 100 ~ 200 之间的素数。
+
+==《素数求解的n种境界》==
+
+```c
+#include <stdio.h>
+#include <math.h>
+int main()
+{
+    int i = 0;
+    int count = 0;
+    for (i = 101; i <= 200; i+=2)
+    {    
+        int j = 0;
+        // sqrt() -- 开平方的数学库函数
+        for (j = 2; j <= sqrt(i); j++)
+        {
+            if (0 == i % j)
+            { 
+                break;
+            }                
+        }
+        if (j > sqrt(i))
+        {
+            count++;
+            printf("%d是素数\n", i);
+
+        }
+    }
+    printf("count = %d\n", count);
+    return 0;
+}
+```
+
+> 计算1/1-1/2+1/3+1/4+1/5+……+1/99-1/100的值，打印结果。
+
+```c
+#include <stdio.h>
+int main()
+{
+    int i = 0;
+    int flag = 1;
+    double sum = 0;
+    for (i = 1; i < 101; i++)
+    {
+        sum += flag * 1.0 / i;
+        flag = -flag;
+    }
+    printf("sum = %lf", sum);
+    return 0;
+}
+```
+
+> 求十个整数中的最大值
+
+```c
+#include <stdio.h>
+int main()
+{
+    int arr[] = { -1,-2,-3,-4,-5,-6,-7,-8,-9,-10 };
+    int max = arr[0]; // 由于数组中的数都是小于0 的，如果将max初始化为0，则将找不出该数组中的最大值。所以用数组的第一个数对max进行初始化。
+    int i = 0;
+    int sz = sizeof(arr) / sizeof(arr[0]);
+    for (i = 0; i < sz; i++)
+    {
+        if (arr[i] > max) {
+            max = arr[i];
+        }
+    }
+    printf("max = %d\n", max);
+    return 0;
+}
+```
+
+> 打印九九乘法表
+
+```c
+#include <stdio.h>
+#include <math.h>
+int main()
+{
+    int i = 0;
+    int j = 0;
+    for (i = 1; i <= 9; i++)
+    {
+        for (j = 1; j <= i; j++)
+            // %xd , x指定的域宽，默认是右对齐的
+            // %-xd，x指定的域宽，默认是左对齐的
+            printf("%d*%d=%d\t", j, i, i * j);
+        printf("\n");
+    }
+    return 0;
+}
+```
+
+> 猜大小游戏
+
+```c
+#include <stdio.h>
+#include <time.h>
+#include <stdlib.h>
+void menu()
+{
+    //system("cls");
+    printf("***************************************\n");
+    printf("****  1.play         0.exit        ****\n");
+    printf("***************************************\n");
+}
+
+// 0x123  -- 十六进制
+// 0123   -- 八进制
+void game()
+{
+    // 1. 生成一个随机数
+    int ret = 0;
+    int guess = 0; // 接收猜的数字
+    // 拿时间戳来设置随机数的生成起始点
+    // time_t time(time_t *timer)
+    // time_t
+    //srand((unsigned int)time(NULL));
+
+    // rand() 生成 0~0x7fff 的随机值
+    ret = rand()%100+1; // 生成1-100之间的随机数
+    // printf("%d\n", ret);
+    // 2. 猜数字
+    while (1)
+    {
+        printf("请猜数字:>");
+        scanf("%d", &guess);
+        if (guess > ret)
+            printf("猜大了\n");
+        else if (guess < ret)
+            printf("猜小了\n");
+        else
+        {
+            printf("猜对了\n");
+            break;
+        }
+    }   
+}
+int main()
+{
+    int input = 0;
+    srand((unsigned int)time(NULL));
+    do
+    {
+        menu();
+        printf("请选择：>");
+        scanf("%d", &input);
+        switch (input)
+        {
+        case 1:
+            game();
+            break;
+        case 0:
+            printf("退出游戏\n");
+            break;
+        default:
+            printf("选择错误\n");
+            break;   
+        }
+
+    } while (input);
+    return 0;
+}
+```
 
 ### 2.2.5 goto 语句
 
 + **不建议使用`goto`语句。**
 
-​```c
+```c
 #include <stdio.h>
 int main()
 {
@@ -1789,10 +1802,6 @@ int main()
 
 `p`指向的是`h`的地址，`*p`是`h`。
 
-
-
-
-
 # 第三章 函数
 
 ## 3.1 函数是什么？
@@ -1840,7 +1849,6 @@ int main()
 	strcpy(arr2, arr1);
 	printf("%s\n", arr2);
 
-
 	// strlen  -- string length  -- 跟字符串长度有关的
 	// strcpy  -- string copy    -- 字符串复制有关。// /0也会拷贝
 
@@ -1852,9 +1860,7 @@ int main()
 
 ![](C语言.assets/4.jpg)
 
-
-
-[memset](http://www.cplusplus.com/reference/cstring/memset/?kw=memset)    -- memory -- 内存   set  -- 设置、
+[memset](http://www.cplusplus.com/reference/cstring/memset/?kw=memset)    -- memory -- 内存   set  -- 设置
 
 ```c
 void * memset ( void * ptr, int value, size_t num );
@@ -1873,9 +1879,18 @@ int main ()
 }
 // 运行结果
 // ------ every programmer should know memset!
+
+
+#include <stdio.h>
+#include <string.h>
+int main()
+{
+	char arr[] = "hello bit";
+	char* ret = (char*)memset(arr, 'x', 5);
+	printf("%s\n", ret);
+	return 0;
+}
 ```
-
-
 
 **需要学会查询工具的使用：**
 
@@ -1883,11 +1898,9 @@ int main ()
 >
 > www.cplusplus.com
 >
-> http://en.cppreference.com   (英文)
+> http://en.cppreference.com   (英文版)
 >
-> http://zh.cppreference.com  （中文）
-
-
+> http://zh.cppreference.com  （中文版）
 
 ## 3.3 自定义函数
 
@@ -1904,7 +1917,7 @@ fun_name 函数名
 para1    函数参数
 ```
 
-**举例 1：**比较两个数的大小。
+> 比较两个数的大小。
 
 ```c
 #include <stdio.h>
@@ -1929,7 +1942,7 @@ int main()
 }
 ```
 
-**举例 2：**交换两个整型变量的值。
+> 用函数交换两个整型变量的值。
 
 ```c
 #include <stdio.h>
@@ -1946,7 +1959,6 @@ int main()
 // 当实参传给形参的时候，
 // 形参是实参的一份临时拷贝
 // 对形参的修改是不会改变实参的
-
 
 void Swap2(int* pa, int* pb) {
 	int tmp = 0;
@@ -1970,19 +1982,23 @@ int main()
 // a = 20, b = 10
 ```
 
+**总结：**
 
+能将函数处理结果的两个数据返回给主调函数，的方法有：1. 形参用数组，2.形参用两个指针，3.用两个全局变量。
 
 ## 3.4 函数的参数
 
 **实际参数（实参）：**
 
-> 真实传给函数的参数，叫实参。实参可以是：常量、变量、表达式、函数等。无论实参是何种类型的量，在进行函数调用时，它们都必须有确定的值，以便把这些值传送给形参。
+> 真实传给函数的参数，叫实参。
+>
+> 实参可以是：常量、变量、表达式、函数等。
+>
+> 无论实参是何种类型的量，在进行函数调用时，它们都必须有确定的值，以便把这些值传送给形参。
 
 **形式参数（形参）：**
 
 > 形式参数是指函数名后括号中的变量，因为形式参数只有在函数被调用的过程中才实例化（分配 内存单元），所以叫形式参数。形式参数当函数调用完成之后就自动销毁了。因此形式参数只在函数中有效。
-
-
 
 ## 3.5 函数的调用
 
@@ -1997,137 +2013,124 @@ int main()
 > + 传址调用是把函数外部创建变量的内存地址传递给函数参数的一种调用函数的格式。
 > + 这种传参方式可以让函数和函数外边的变量建立起真正的联系，也就是函数内部可以直接操作函数外部的变量。
 
+**练习：**
 
+>  写一个函数，判断一个数是否是素数。
 
-### **练习：**
+```c
+#include <stdio.h>
+#include <math.h>
 
-1. 写一个函数，判断一个数是否是素数。
+int is_prime(int x)
+{
+	int i = 0;
+	for (i = 2; i <= sqrt(x); i++)
+		if (x % i == 0)
+			return 0;
+	return 1;
+}
 
-   ```c
-   #include <stdio.h>
-   #include <math.h>
-   int is_prime(int x)
-   {
-   	int i = 0;
-   	for (i = 2; i <= sqrt(x); i++)
-   		if (x % i == 0)
-   			return 0;
-   	return 1;
-   
-   }
-   int main()
-   {
-   	int a = 18;
-   	if (1 == is_prime(a))
-   		printf("%d是素数\n", a);
-   	else
-   		printf("%d不是素数\n", a);
-   
-   	return 0;
-   }
-   ```
+int main()
+{
+	int a = 18;
+	if (1 == is_prime(a))
+		printf("%d是素数\n", a);
+	else
+		printf("%d不是素数\n", a);
 
-   
+	return 0;
+}
+```
 
-2. 写一个函数，判断一年是否是闰年。
+>  写一个函数，判断一年是否是闰年。
 
-   ```c
-   #include <stdio.h>
-   int is_leap_year(int x)
-   {
-   	if ((x % 4 == 0 && x % 100 != 0) || (x % 400 == 0))
-   		return 1;
-   	else return 0;
-   }
-   int main()
-   {
-   	int year = 2008;
-   	if(1 == is_leap_year(year))
-   		printf("%d是闰年\n", year);
-   	else
-   		printf("%d不是闰年\n", year);
-   	return 0;
-   }
-   ```
+```c
+#include <stdio.h>
+int is_leap_year(int x)
+{
+	return ((x % 4 == 0 && x % 100 != 0) || (x % 400 == 0));
+}
+int main()
+{
+	int year = 2008;
+	if(1 == is_leap_year(year))
+		printf("%d是闰年\n", year);
+	else
+		printf("%d不是闰年\n", year);
+	return 0;
+}
+```
 
-   
+>  写一个函数，实现一个整形数组的二分查找。
 
-3. 写一个函数，实现一个整形数组的二分查找。
+```c
+#include <stdio.h>
+				// 本质上这里的 a 是一个指针
+int binary_search(int a[], int b,int sz)
+{
+	int left = 0;
+	// 调用函数的时候不能使用这种方式，求数组长度。
+	// 	   sizeof() 计算指针的大小就是 4 或者 8
+	// int sz = sizeof(a) / sizeof(a[0]);
+	 int right = sz - 1;
 
-   ```c
-   #include <stdio.h>
-   				// 本质上这里的 a 是一个指针
-   int binary_search(int a[], int b,int sz)
-   {
-   	int left = 0;
-   	// 调用函数的时候不能使用这种方式，求数组长度。
-   	// 	   sizeof() 计算指针的大小就是 4 或者 8
-   	// int sz = sizeof(a) / sizeof(a[0]);
-   	 int right = sz - 1;
-   
-   
-   	while (left <= right)
-   	{
-   		int mid = (left + right) / 2;
-   		if (a[mid] < b)
-   			left = mid + 1;
-   		else if (a[mid] > b)
-   			right = mid - 1;
-   		else
-   			return mid;
-   	}
-   	return -1;
-   
-   
-   }
-   int main()
-   {
-   	// 二分查找
-   	// 在一个有序数组中查找具体的某个数
-   	// 如果找到了，返回这个数的下标，找不到返回-1
-   	int arr[] = { 1,2,3,4,5,6,7,8,9,10 };
-   	int k = 1;
-   	int sz = sizeof(arr) / sizeof(arr[0]);
-   	// 传递过去的是首元素的地址
-   	int ret = binary_search(arr,k,sz);
-   	if (ret == -1)
-   		printf("找不到指定数字\n");
-   	else
-   		printf("找到了,下标是：%d\n", ret);
-   
-   	return 0;
-   }
-   ```
+	while (left <= right)
+	{
+		int mid = (left + right) / 2;
+		if (a[mid] < b)
+			left = mid + 1;
+		else if (a[mid] > b)
+			right = mid - 1;
+		else
+			return mid;
+	}
+	return -1;
+}
 
-   
+int main()
+{
+	// 二分查找
+	// 在一个有序数组中查找具体的某个数
+	// 如果找到了，返回这个数的下标，找不到返回-1
+	int arr[] = { 1,2,3,4,5,6,7,8,9,10 };
+	int k = 1;
+	int sz = sizeof(arr) / sizeof(arr[0]);
+	// 传递过去的是首元素的地址
+	int ret = binary_search(arr,k,sz);
+	if (ret == -1)
+		printf("找不到指定数字\n");
+	else
+		printf("找到了,下标是：%d\n", ret);
 
-4. 写一个函数，每调用一次这个函数，就将num的值增加1。
+	return 0;
+}
+```
 
-   ```c
-   #include <stdio.h>
-   void Add(int* p)
-   {
-   	(*p)++;
-       // 由于++的优先级比*高，如果不给*p加括号，那么将得不出正确的结果。
-   }
-   int main()
-   {
-   	int num = 0;
-   	Add(&num);
-   	printf("num = %d\n", num);
-   	Add(&num);
-   	printf("num = %d\n", num);
-   	Add(&num);
-   	printf("num = %d\n", num);
-   
-   	return 0;
-   }
-   // num = 1
-   // num = 2
-   // num = 3
-   ```
+> 写一个函数，每调用一次这个函数，就将num的值增加1。
 
-   
+```c
+#include <stdio.h>
+void Add(int* p)
+{
+	(*p)++;
+    // 由于++的优先级比*高，如果不给*p加括号，那么将得不出正确的结果。
+}
+int main()
+{
+	int num = 0;
+	Add(&num);
+	printf("num = %d\n", num);
+	Add(&num);
+	printf("num = %d\n", num);
+	Add(&num);
+	printf("num = %d\n", num);
+
+	return 0;
+}
+// num = 1
+// num = 2
+// num = 3
+```
 
 ## 3.6 函数的嵌套调用和链式访问
 
@@ -2158,8 +2161,6 @@ int main()
 // hehe 
 ```
 
-
-
 ### 3.6.2 链式访问
 
 > 把一个函数的返回值作为另外一个函数的参数。
@@ -2167,7 +2168,8 @@ int main()
 ```c
 int main()
 {
-    // printf的返回值是字符个数
+    // printf的返回值是打印在屏幕上的字符的个数。
+    // 如果发生错误，将返回负数。
     printf("%d",printf("%d",printf("%d",43)));
     return 0;
 }
@@ -2175,8 +2177,6 @@ int main()
 // 运行结果
 // 4321
 ```
-
-
 
 ## 3.7 函数的声明和调用
 
@@ -2202,8 +2202,6 @@ int main()
   #endif // !__ADD_H__
   
   ```
-
-  
 
 + **将函数定义放到` Add.c` 文件中。**
 
@@ -2233,7 +2231,6 @@ int main()
   }
   ```
 
-  
 
 ## 3.8  递归
 
@@ -3383,7 +3380,7 @@ int main()
 
 > 例：写一个关机程序 。
 >
-> 程序运行，你的电脑在1分钟后关机，如果输入：我是猪，就取消关机。
+> 程序运行，你的电脑在1分钟后关机，如果输入：哈哈，就取消关机。
 
 ```c
 #include <stdio.h>
@@ -3473,8 +3470,6 @@ int main()
 
 	printf("%d\n", sizeof(arr)); // 40
 	printf("%d\n", sizeof(int [10])); // 40  -- 数组也有类型 -- 去掉数组名就是
-
-
 
 
 	printf("%d\n", sizeof(s = a + 5)); // 2   大小由s决定 -- sizeof()里的表达式不参与运算。
@@ -3630,7 +3625,7 @@ exp1 ? exp2 : exp3
 
 ### 5.1.10 逗号表达式
 
-**逗号表达式的结果是最后一个表达式的值。 **
+**逗号表达式 -- 从左到右依次计算，整个表达式的结果是最后一个表达式的值。 **
 
 ```c
 exp1, exp2, exp3, …expN
@@ -3676,7 +3671,9 @@ while (a = get_val(), count_val(a), a>0)
    arr[9] = 10;
    ```
 
-2. `()` 函数调用操作符 接受一个或者多个操作数：第一个操作数是函数名，剩余的操作数就是传递给函数的参数。
+2. `()` **函数调用操作符** 
+
+   接受一个或者多个操作数：第一个操作数是函数名，剩余的操作数就是传递给函数的参数。
 
    **操作数**：函数名 + 参数。
 
@@ -4265,7 +4262,7 @@ int main()
 {
 	int arr[10] = { 1,2,3,4,5,6,7,8,9.10 };
 	char ch[5] = { 0 };
-	printf("%d\n",& arr[9] - &arr[0]); //  9    -- 指针 - 指针 得到的是中间的元素个数
+	printf("%d\n",& arr[9] - &arr[0]); //  9    -- 指针 - 指针 得到的数字的绝对值是中间的元素个数
 	printf("%d\n", &arr[0] - &arr[9]); // -9
 
 	// printf("%d\n",& arr[9] - &ch[0]);  // 错误写法，结果不可预知
@@ -4328,11 +4325,19 @@ int main()
 
 + **标准规定：**
 
-  > 允许指向数组元素的指针与指向数组最后一个元素后面的那个内存位置的指针比较，但是不允许 与指向第一个元素之前的那个内存位置的指针进行比较。
+  > 允许指向数组元素的指针与指向数组最后一个元素后面的那个内存位置的指针比较，但是不允许与指向第一个元素之前的那个内存位置的指针进行比较。
 
-
+![](C语言.assets/80.png)
 
 ## 6.4  指针和数组
+
+**数组** -- 是一块连续的空间，放到是相同类型的元素。
+
+数组的大小和元素类型，元素个数有关。
+
+**指针（变量）** -- 是一个变量，放地址 。
+
+指针变量的大小 是4(32bit)/8(64bit) 个byte。
 
 ```c
 int main()
@@ -4416,8 +4421,6 @@ int main()
 }
 ```
 
-
-
 ## 6.6 指针数组
 
 > // 好孩子 ： 是 **孩子**。
@@ -4453,8 +4456,6 @@ int main()
 // 运行结果
 // 10 20 30
 ```
-
-
 
 # 第七章 结构体
 
@@ -4515,13 +4516,9 @@ int main()
 }
 ```
 
-
-
 **结构成员的类型**
 
 结构的成员可以是标量（普通变量）、数组、指针，甚至是其他结构体。
-
-
 
 ## 7.2 结构体变量的定义和初始化
 
@@ -4535,6 +4532,7 @@ struct Point p2; // 定义结构体变量p2
 
 // 初始化：定义变量的同时赋初值。
 struct Point p3 = { x,y };
+struct Point p4 = {0};
 
 struct Stu    // 类型声明
 {
@@ -4575,16 +4573,14 @@ int main()
 {
 	char arr[] = "hello bit\n";
 	struct T t = { "hehe",{100,'w',"hello world",3.14},arr };
-	printf("%s\n", t.ch); // hehe
+	struct T* pt = &t;
+    printf("%s\n", t.ch); // hehe
 	printf("%s\n", t.s.arr); // hello world
+    //printf("%s\n",pt->s.arr);
 	printf("%lf\n", t.s.d); // 3.14
 	printf("%s\n", t.pc);  // hello bit
 }
 ```
-
-
-
-
 
 ## 7.3 结构体成员的访问
 
@@ -4615,7 +4611,6 @@ int main()
   }
   ```
 
-  
 
 ## 7.4 结构体传参
 
@@ -4649,15 +4644,14 @@ int main()
 }
 ```
 
-
-
 上面两个`print`函数，首选 `Print2`函数。原因：
 
 > 函数传参的时候，参数是需要压栈的。如果传递一个结构体对象的时候，结构体过大，参数压栈的系统开销比较大，所以会导致性能的下降。
 
-**结论：** 结构体传参的时候，要传结构体的地址。
+**结论：** 
 
-
++ 结构体传参的时候，要传结构体的地址。
++ 全局变量，静态变量都存放在静态区，不初始化，默认为0。
 
 **《函数栈帧的创建和销毁》**
 
@@ -4736,8 +4730,6 @@ int main()
 }
 ```
 
-
-
 # 第八章 实用调试技巧
 
 ## 8.1 调试是什么 ？ 有多重要 ？
@@ -4805,17 +4797,13 @@ int main()
 }
 ```
 
-
-
-如果的 `debug` 模式去编译，x86环境下会死循环。如果是`release`模式去编译，程序不会报错。它们之间的区别就是因为优化导致的。
+如果是 `debug` 模式去编译，x86环境下会死循环。如果是`release`模式去编译，程序不会报错。它们之间的区别就是因为优化导致的。
 
 **`debug` 和 `release`模式的比较：**
 
 ![](C语言.assets/41.jpg)
 
 ![](C语言.assets/42.jpg)
-
-
 
 `Release` 版本 会将内存分布的结构进行优化，从而影响到了程序执行的结构。
 
@@ -4972,6 +4960,8 @@ int main()
 ![](C语言.assets/40.jpg)
 
 **总结：**  如果将循环判断条件改成`i<12` 则不会进入死循环，直接报栈被破坏的错误，而`i<=12`时报错是因为程序矛盾在循环上，没有机会报错。
+
+![image-20210803160125441](C语言.assets/77.png)
 
 ## 8.5 如何写出好 （易于调试） 的代码
 
@@ -5144,8 +5134,6 @@ int main()
 
 ![](C语言.assets/45.jpg)
 
-
-
 **结论：**
 
 `const` 修饰指针变量的时候：
@@ -5182,8 +5170,6 @@ int main()
 }
 ```
 
-
-
 ## 8.6 编程常见的错误
 
 ### **常见的错误分类：**
@@ -5202,11 +5188,7 @@ int main()
 
 > 借助调试，逐步定位问题。最难搞。
 
-
-
-
-
-**作业题**
+## 8.7 作业题
 
 > 以下关于指针的说法正确的  (C )。
 >
