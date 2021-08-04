@@ -2193,6 +2193,8 @@ int main()
 + **将函数声明放到`Add.h`文件中。**
 
   ```c
+  // #pragma one  -- 使头文件只会被包含一次。 -- 等价于 ifndef
+  
   #ifndef __ADD_H__    // 如果没有定义过__ADD_H__ 
   #define __ADD_H__    // 定义__ADD_H__ 
   
@@ -2218,8 +2220,10 @@ int main()
 
   ```c
   #include <stdio.h>
-  
   #include "add.h"  // 自己写的头文件用 "" 双引号引 
+  
+  // 导入静态库
+  // #pragma comment(lib,"add.lib")
   int main()
   {
   	int a = 10;
@@ -2231,14 +2235,20 @@ int main()
   }
   ```
 
+**分块去写的好处**：
+
+1. 多人协同；
+2. 封装和隐藏；
 
 ## 3.8  递归
 
 ### 什么是递归？
 
-> 程序调用自身的编程技巧称为递归（ recursion）。 递归做为一种算法在程序设计语言中广泛应用。 一个过程或函数在其定义或说明中有直接或间接调用自身的一种方法，它通常把一个大型复杂的问题层层转化为一个与原问题相似的规模较小的问题来求解，递归策略只需少量的程序就可描述出解题过程所需要的多次重复计算，大大地减少了程序的代码量。 **递归的主要思考方式在于：把大事化小**。
-
-
+> 程序调用自身的编程技巧称为递归（ recursion）。 
+>
+> 递归做为一种算法在程序设计语言中广泛应用。 一个过程或函数在其定义或说明中有直接或间接调用自身的一种方法，它通常把一个大型复杂的问题层层转化为一个与原问题相似的规模较小的问题来求解，递归策略只需少量的程序就可描述出解题过程所需要的多次重复计算，大大地减少了程序的代码量。 
+>
+> **递归的主要思考方式在于：把大事化小**。
 
 + **最简单的递归调用**
 
@@ -2265,175 +2275,191 @@ int main()
 + ==存在限制条件==，当满足这个限制条件的时候，递归便不再继续。
 + 每次递归调用之后越来越接近这个限制条件。
 
-
+《**函数栈帧的创建和销毁**》
 
 **练习**
 
-1. 接收一个整型值（无符号），按照顺序打印它的每一位。例如：输入1234，输出1 2 3 4.
+> 接收一个整型值（无符号），按照顺序打印它的每一位。例如：输入1234，输出1 2 3 4.
 
-   ```c
-   #include <stdio.h>
-   void print(int n)
-   {
-   	if (n > 9)
-   	{
-   		print(n / 10);
-   	}
-   	printf("%d ", n % 10);
-   }
-   int main()
-   {
-   	unsigned int num = 0;
-   	scanf("%d", &num); // 1234
-   
-   	// 递归
-   	// print(1234)
-   	// print(123)   4
-   	// print(12)  3 4
-   	// print(1) 2 3 4   
-   	//
-   	print(num);
-   	return 0;
-   }
-   ```
+```c
+#include <stdio.h>
+void print(unsigned int n)
+{
+	if (n > 9)
+	{
+		print(n / 10);
+	}
+	printf("%d ", n % 10);
+}
+int main()
+{
+	unsigned int num = 0;
+	scanf("%d", &num); // 1234
 
-   ![](C语言.assets/7.jpg)
+	// 递归
+	// print(1234)
+	// print(123)   4
+	// print(12)  3 4
+	// print(1) 2 3 4   
+	//
+	print(num);
+	return 0;
+}
+```
 
-2. 编写函数不允许创建临时变量，求字符串的长度。
+![](C语言.assets/7.jpg)
 
-   ```c
-   #include <stdio.h>
-   #include <string.h>
-   
-   //int my_strlen(char* str)
-   //{
-   //	int count = 0;
-   //	while(*str != '\0')
-   //	{
-   //		count++;
-   //		str++;
-   //	}
-   //	return count;
-   //}
-   
-   
-   // 递归的方法
-   // 把大事化小
-   // my_strlen("bit");
-   // 1+my_strlen("it");
-   // 1+1+my_strlen("t");
-   // 1+1+1+my_strlen("");
-   // 1+1+1+0
-   int my_strlen(char* str)
-   {
-   	if (*str != '\0')
-   		return 1 + my_strlen(str + 1);
-   	else
-   		return 0;
-   }
-   
-   int main()
-   {
-   	char arr[] = "bit";
-   	int count = 0;
-   	// int len = strlen(arr);
-   	// printf("%d \n", len);
-   
-   	int len = my_strlen(arr);   // arr是数组，数组传参，传过去的不是整个数组，而是第一个元素的地址
-   	printf("len = %d \n", len);
-   	return 0;
-   }
-   ```
+![](C语言.assets/78.png)
 
-   
+>  编写函数不允许创建临时变量，求字符串的长度。
+
+```c
+#include <stdio.h>
+#include <string.h>
+
+//int my_strlen(char* str)
+//{
+//	int count = 0;
+//	while(*str != '\0')
+//	{
+//		count++;
+//		str++;
+//	}
+//	return count;
+//}
+
+
+// 递归的方法
+// 把大事化小
+// my_strlen("bit");
+// 1+my_strlen("it");
+// 1+1+my_strlen("t");
+// 1+1+1+my_strlen("");
+// 1+1+1+0
+int my_strlen(char* str)
+{
+	if (*str != '\0')
+		return 1 + my_strlen(str + 1);
+	else
+		return 0;
+}
+
+int main()
+{
+	char arr[] = "bit";
+    // char* p = "bit"; // 也可以
+	int count = 0;
+	// int len = strlen(arr);
+	// printf("%d \n", len);
+
+	int len = my_strlen(arr);   // arr是数组，数组传参，传过去的不是整个数组，而是第一个元素的地址
+	printf("len = %d \n", len);
+	return 0;
+}
+
+#include <stdio.h>
+#include <assert.h>
+unsigned int my_strlen(const char* str)
+{
+	assert(str != NULL);
+	int count = 0;
+	while (*str++)
+		count++;
+	return count;
+}
+int main()
+{
+	char arr[] = "abcdef";
+	printf("字符个数为：%u\n", my_strlen(arr));
+	return 0;
+}
+```
 
 ### 递归与迭代
 
-1. 求n的阶乘（不考虑溢出）
+> 求n的阶乘（不考虑溢出）
 
-   ```c
-   #include <stdio.h>
-   
-   //int Fac1(int n)
-   //{
-   //	int i = 0; 
-   //	int ret = 1;
-   //	for (i = 1; i <= n; i++)
-   //		ret *= i;
-   //	return ret;
-   //}
-   
-   
-   int Fac2(int n)
-   {
-   	if (n <= 1)
-   		return 1;
-   	else
-   		return n * Fac2(n - 1);
-   }
-   int main()
-   {
-   	// 求 n 的阶乘
-   	int n = 0;
-   	int ret = 0;
-   	scanf("%d", &n);
-   	// ret = Fac1(n);  // 循环的方式
-   	ret = Fac2(n);  // 递归的方式
-   	printf("%d\n", ret);
-   	return 0;
-   }
-   ```
+```c
+#include <stdio.h>
 
-2. 求第 n 个斐波那契数 （不考虑溢出）。
+//int Fac1(int n)
+//{
+//	int i = 0; 
+//	int ret = 1;
+//	for (i = 1; i <= n; i++)
+//		ret *= i;
+//	return ret;
+//}
 
-   ```c
-   #include <stdio.h>
-   
-   int count = 0;
-   // 递归方法求斐波那契数
-   //int Fib(int n)
-   //{
-   //	if (3 == n) 
-   //	{
-   //		count++;
-   //	}
-   //	if (n <= 2)
-   //		return 1;
-   //	else
-   //		return  Fib(n - 1) + Fib(n - 2);
-   //}
-   
-   
-   // 循环方式求斐波那契数
-   int Fib(int n)
-   {
-   	int a = 1;
-   	int b = 1;
-   	int c = 1; // 若将 c 赋值 0，则 n =1 和 n = 2的情况无法计算，将 c 赋值为1,则可以解决这个问题。
-   	while (n > 2 )
-   	{
-   		c = a + b;
-   		a = b;
-   		b = c;
-   		n--;
-   	}
-   	return c;
-   }
-   int main()
-   {
-   	// 求 n 的阶乘
-   	int n = 0;
-   	int ret = 0;
-   	scanf("%d", &n);
-   	// TDD -- 测试驱动开发
-   	ret = Fib(n);
-   	printf("ret = %d\n", ret);
-   	// printf("count = %d \n", count);
-   	return 0;
-   }
-   ```
 
-   
+int Fac2(int n)
+{
+	if (n <= 1)
+		return 1;
+	else
+		return n * Fac2(n - 1);
+}
+int main()
+{
+	// 求 n 的阶乘
+	int n = 0;
+	int ret = 0;
+	scanf("%d", &n);
+	// ret = Fac1(n);  // 循环的方式
+	ret = Fac2(n);  // 递归的方式
+	printf("%d\n", ret);
+	return 0;
+}
+```
+
+> 求第 n 个斐波那契数 （不考虑溢出）。
+
+```c
+#include <stdio.h>
+
+int count = 0;
+// 递归方法求斐波那契数
+//int Fib(int n)
+//{
+//	if (3 == n) 
+//	{
+//		count++;
+//	}
+//	if (n <= 2)
+//		return 1;
+//	else
+//		return  Fib(n - 1) + Fib(n - 2);
+//}
+
+
+// 循环方式求斐波那契数
+int Fib(int n)
+{
+	int a = 1;
+	int b = 1;
+	int c = 1; // 若将 c 赋值 0，则 n =1 和 n = 2的情况无法计算，将 c 赋值为1,则可以解决这个问题。
+	while (n > 2 )
+	{
+		c = a + b;
+		a = b;
+		b = c;
+		n--;
+	}
+	return c;
+}
+int main()
+{
+	// 求 n 的阶乘
+	int n = 0;
+	int ret = 0;
+	scanf("%d", &n);
+	// TDD -- 测试驱动开发
+	ret = Fib(n);
+	printf("ret = %d\n", ret);
+	// printf("count = %d \n", count);
+	return 0;
+}
+```
 
 **问题：**
 
@@ -2445,14 +2471,16 @@ int main()
 1. 将递归改成非递归。
 2. . 使用static对象替代nonstatic局部对象。在递归函数设计中，可以使用static对象替代nonstatic局 部对象（即栈对 象），这不仅可以减少每次递归调用和返回时产生和释放nonstatic对象的开销， 而且static对象还可以保存递归调用的中间状态，并且可为各个调用层所访问。
 
+**什么时候用递归：**
 
+1. 当解决一个问题递归和非递归都可以使用，且没有明显问题，那就可以使用递归。
+2. 当解决一个问题递归写起来很简单，非递归比较复杂，且递归没用明显问题，那就用递归。
+3. 如果说，用递归解决问题，写起来简单，但是有明显问题，那就不能使用递归。
 
 **函数递归的几个经典题目（自主研究）：**
 
 1. 汉诺塔问题
 2. 青蛙跳台阶问题
-
-
 
 ## 3.9 作业题
 
@@ -3250,6 +3278,7 @@ int main()
 	return 0;
 }
 // 缺点： 若输入的数是负数，则不能得出正确结果
+// 改进： 可将输入的数转换成无符号型，就可以求负数的情况。
 
 
 // 算法二
@@ -3274,7 +3303,9 @@ int main()
 }
 
 
-// 算法三  --- 经典算法
+// 算法三  --- 经典算法  -- 谷歌笔试题
+// 判断 n是2的次方数吗  -- 2的n次方 -- 32个二进制位只有一个1
+// n = n&(n-1)
 int main()
 {
 	int num = 0;
@@ -5017,6 +5048,8 @@ int main()
 // 7分
 void my_strcpy(char* dest, char* src)
 {
+    // 1. 拷贝字符
+    // 2. 遇到\0循环停止
 	while (*dest++ = *src++)
 	{
 		;
@@ -5041,7 +5074,7 @@ void my_strcpy(char* dest, char* src)
 // 8分
 void my_strcpy(char* dest, char* src)
 {
-	assert(dest != NULL); // 断言
+	assert(dest != NULL); // 断言（宏） -- release 版本可以优化掉
 	assert(src != NULL);
 
 
@@ -5056,8 +5089,9 @@ void my_strcpy(char* dest, char* src)
 void my_strcpy(char* dest, const char* src)
 {
 	assert(dest != NULL); // 断言
+    // assert(dest);
 	assert(src != NULL);  // 断言
-
+	// assert(dest && src);
 
 	while (*dest++ = *src++)
 	{
@@ -5066,13 +5100,15 @@ void my_strcpy(char* dest, const char* src)
 }
 
 // 10 分
+#include <stdio.h>
+#include <assert.h>
 char* my_strcpy(char* dest, const char* src)
 {
 	char* ret = dest;
 	assert(dest != NULL); // 断言
 	assert(src != NULL);  // 断言
 
-    // 把 src 指向的字符串拷贝到 dest 指向的空间，包含 '\0'字符
+	// 把 src 指向的字符串拷贝到 dest 指向的空间，包含 '\0'字符
 	while (*dest++ = *src++)
 	{
 		;
@@ -5083,16 +5119,29 @@ int main()
 {
 	// strcpy
 	// 字符串拷贝
-	char arr1[] = "###################";
-	char arr2[] = "bit";
+	// 1
+	//char arr1[] = "###################";
+	//char arr2[] = "bit";
 
-    // 链式访问
+	// 2  -- 错误写法  -- arr2没有'\0'，循环不会停止
+	// 	   源字符串中一定要有\0
+	//char arr1[] = "###################";
+	//char arr2[] = { 'a','b','c' };
+
+	// 3   -- 目标空间必须足够大
+	//char arr1[3] = { 0 };
+	//char arr2[] = "abcdef";
+
+	// 4  -- 目标空间必须可修改
+	char* arr1 = "xxxxxxxxx"; // 常量字符串，是放在常量区的，是不能修改的
+	// const char* arr1 = "xxxxxxxxx"; //严谨的写法
+	char arr2[] = "abcdef";
+	
+	// 链式访问
 	printf("%s\n", my_strcpy(arr1, arr2));
 	return 0;
 }
 ```
-
-
 
 **注意：**
 
@@ -5108,8 +5157,13 @@ int main()
 int main()
 {
 	const int num = 10;
+    //int* p = &num;
+    //*p = 20; // 会报警告！！！
+    //printf("%d\n",num); // 20
+    
 	int n = 100;
 	//const int* p = &num;
+    // 等价于 int* const p = &num;
 	// //*p = 20;   // error      const 放在指针变量的 * 左边时，修饰的是 *p，也就是说：不能通过 p 来改变 *P （num）的值。
 	//p = &n;
 
@@ -5139,7 +5193,7 @@ int main()
 `const` 修饰指针变量的时候：
 
 > 1. `const`如果放在`*`的左边，修饰的是指针指向的内容，保证指针指向的内容不能通过指针来改变。但是指针变量本身的内容可变。
-> 2.  `const`如果放在`*`的右边，修饰的是指针变量本身，保证了指针变量的内容不能修改，但是指针指向的内容，可以通过指针改变。
+> 2.  `const`如果放在`*`的右边，修饰的是指针变量本身，保证了指针变量的内容不能修改，但是指针指向的内容可以通过指针改变。
 
 **注：**介绍《高质量C/C++编程》一书中最后章节试卷中有关 strcpy 模拟实现的题目。
 
@@ -5149,7 +5203,7 @@ int main()
 
 ```c
 #include <assert.h>
-int my_strlen(const char* str)
+int my_strlen(const char* str) // 将返回类型改成unsigned 更合适  -- 但是也有问题  sizeof("adc") - sizeof("dsafsafsaf") 永远大于0
 {
 	int count = 0;
 	assert(str != NULL); // 断言指针  -- 保证指针的有效性。
